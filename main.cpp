@@ -291,8 +291,17 @@ int main()
         '\n',0 // end line 
     };
 
-    byteCode = fib;
-    length = (128);
+    byte Three[] {
+        0,0,0,5,
+        1,0,0,0,0,0,0,0,2,
+        5,0,0,0,0,0,0,0,0,1,
+        4,0,0,0,0,
+        4,0,0,0,1,
+        17,255
+        };
+
+    byteCode = Three;
+    length = (35);
     Run();
 
 }
