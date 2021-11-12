@@ -130,118 +130,118 @@ void Run()
         switch (byteCode[i])
         {
         case 0:
-            //Clear temps (;)
-            temp1=0;
-            temp2=0;
-            break;
-        case 1:
             //Load num (89)
             temp1 = LoadNum(i);
             break;
-        case 2:
+        case 1:
             //Load variable (X)
             temp1 = LoadVar(i);
             break;
-        case 3:
+        case 2:
             //Load string* ("Hello, World!\n")
             temp1 = LoadStringPointer(i);
             break;
-        case 4:
+        case 3:
             //Set variable
             StoreVar(i);
             break;
-        case 5:
+        case 4:
             // +
             LoadSecondary(i);
             temp1 += temp2;
             break;
-        case 6:
+        case 5:
             // - 
             LoadSecondary(i);
             temp1 = temp2 - temp1;
             break;
-        case 7:
+        case 6:
             // *
             LoadSecondary(i);
             temp1 *= temp2;
             break;
-        case 8:
+        case 7:
             // /
             LoadSecondary(i);
             temp1 = temp2 / temp1;
             break;
-        case 9:
+        case 8:
             // %
             LoadSecondary(i);
             temp1 = temp2 % temp1;
             break;
-        case 10:
+        case 9:
             // ==
             LoadSecondary(i);
             temp1 = (temp2==temp1);
             break;
-        case 11:
+        case 10:
             // !=
             LoadSecondary(i);
             temp1 = (temp2!=temp1);
             break;
-        case 12:
+        case 11:
             // >
             LoadSecondary(i);
             temp1 = (temp2>temp1);
             break;
-        case 13:
+        case 12:
             // <
             LoadSecondary(i);
             temp1 = (temp2<temp1);
             break;
-        case 14:
+        case 13:
             // >=
             LoadSecondary(i);
             temp1 = (temp2>=temp1);
             break;
-        case 15:
+        case 14:
             // <=
             LoadSecondary(i);
             temp1 = (temp2>=temp1);
             break;
-        case 16:
+        case 15:
             // !
             temp1 = !temp1;
             break;
-        case 17:
+        case 16:
             //print num
             std::cout << temp1;
             break;
-        case 18:
+        case 17:
             //print char
             std::cout << (char)temp1;
             break;
-        case 19:
+        case 18:
             //print str
             PrintString(temp1);
             break;
-        case 20:
+        case 19:
             //++
             temp1++;
             break;
-        case 21:
+        case 20:
             //--
             temp1--;
             break;
-        case 22:
+        case 21:
             //jmp
             i = BytesTolong(i)-1;
             break;
-        case 23:
+        case 22:
             //jmp not zero (if true)
             if(temp1) i = BytesTolong(i)-1;
             else i+=8;
             break;
-        case 24:
+        case 23:
             //jmp zero (if false)
             if(!temp1) i = BytesTolong(i)-1;
             else i+=8;
+            break;
+        case 254:
+            //Clear temps (;)
+            temp1=0;
+            temp2=0;
             break;
         case 255:
             return;
@@ -255,53 +255,10 @@ void Run()
 //  i = 1, sum = 4, prev = 3, next = 0, x=2
 int main()
 {
-    byte fib[] = {
-        //Prints the first 20 Fibonacci numbers in 128 bytes
-        0,0,0,5, // 5 vars
-        17, // print 0
-        3,0,0,0,0, // load '\n'
-        19,0, // print '\n'
-        4,0,0,0,3, // prev = 0
-        4,0,0,0,4, // sum = 0
-        20, // load 1
-        17, // print 1
-        4,0,0,0,0, // next = 1
-        4,0,0,0,1, // i = 1
-        3,0,0,0,0, // load '\n'
-        19,0, // print '\n'
-        1,0,0,0,0,0,0,0,18, // load 18
-        4,0,0,0,2, // x = 18
-        2,0,0,0,0, // load next
-        5,1,0,0,0,3, // next+prev
-        4,0,0,0,4, // sum = next+prev
-        2,0,0,0,0, // load next
-        4,0,0,0,3, // prev = next
-        2,0,0,0,4, // load sum
-        4,0,0,0,0, // next = sum
-        17, //print next
-        3,0,0,0,0, // load '\n'
-        19,0, // print '\n'
-        2,0,0,0,1, // load i
-        20, // i++
-        4,0,0,0,1, // store i
-        14, // >
-        1,0,0,0,2, // x > i
-        23,0,0,0,0,0,0,0,55, // if x > i jump to 55
-        255, //end program
-        '\n',0 // end line 
+    byte bytes[] = {
+
     };
-
-    byte Three[] {
-        0,0,0,5,
-        1,0,0,0,0,0,0,0,2,
-        5,0,0,0,0,0,0,0,0,1,
-        4,0,0,0,0,
-        4,0,0,0,1,
-        17,255
-        };
-
-    byteCode = Three;
-    length = (35);
+    byteCode = bytes;
+    length = 10;
     Run();
-
 }
