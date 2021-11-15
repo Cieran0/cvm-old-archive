@@ -62,6 +62,7 @@ long LoadStringPointer(long &index)
 
 void StoreVar(long &index) 
 {
+    index++;
     vars[BytesToUint(index)] = temp1;
 }
 
@@ -256,9 +257,9 @@ void Run()
 int main()
 {
     byte bytes[] = {
-
+    0,0,0,1,0,0,0,0,0,0,0,3,232,6,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,11,184,4,0,0,0,0,0,0,0,0,1,5,0,0,0,0,0,0,0,0,0,3,1,0,0,0,0,1,0,0,0,0,16,255
     };
     byteCode = bytes;
-    length = 10;
+    length = 66;
     Run();
 }
