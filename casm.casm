@@ -1,0 +1,12 @@
+mov_reg_u64,$RAX,0,
+mov_reg_u64,$RBX,0,
+mov_reg_u64,$RCX,0,
+mov_reg_u64,$RDX,17,
+syscall,
+mov_reg_mem,$RSX,0,
+push,
+mov_reg_mem,$RSX,1,
+push,
+cmp,==,
+jmpz,0,
+end
