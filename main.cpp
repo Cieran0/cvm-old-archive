@@ -1,265 +1,231 @@
 #include <iostream>
-typedef unsigned char byte;
+#include <stack>
 
-static long* vars;
-static uint varCount =0;
-static uint* stringPtrs;
-static uint stringCount = 0;
-static byte* byteCode;
-static long length;
-static long temp1 = 0;
-static long temp2 = 0;
-static long endPoint = 0;
+#define MEM_SIZE 134217728
 
-long BytesTolong(long &index)
-{
-    index++;
-    long num =0;
-    for (long i = 0; i < 8; i++)
-    {
-        num += (byteCode[index+i] << (7-i)*8);
+typedef unsigned long u64;
+typedef unsigned char u8;
+typedef char s8;
+typedef unsigned char instruction;
+static u64* MAIN_MEM;
+static instruction* IP;
+static std::stack<u64> Stack;
+static std::stack<u64> returnStack;
+
+static bool end = false;
+static u8 program[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 17, 0, 0, 0, 0, 0, 0, 0, 8, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 4, 1, 0, 0, 0, 0, 0, 0, 0, 6, 11, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 255 };
+static u8 program1[] = {1,4, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x57, 6,
+                        1,4, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x0A, 0x00, 0x00, 6,
+                        7,5, 1,0,0,0,0,0,0,0,4,7,5, 0,0,0,0,0,0,0,0, 4,
+                        1,0, 1,0,0,0,0,0,0,0, 1,2, 0,0,0,0,0,0,0,0, 1,3, 14,0,0,0,0,0,0,0, 8, 255};
+// 0x48 0x65 0x6C 0x6C 0x6F 0x2C 0x20 0x57
+// 0x6F 0x72 0x6C 0x64 0x21 0x0A 0x00 0x00
+
+static u64 program_len = sizeof(program);
+
+static u64 reg[5]; 
+static u64* RAX;
+static u64* RBX;
+static u64* RCX;
+static u64* RDX;
+static u64* RSX;
+
+void load_program() {
+    IP = program;
     }
-    index += sizeof(long)-1;
-    return num;
+
+void init_mem() { MAIN_MEM = (u64*)malloc(MEM_SIZE); }
+
+void init_regs(){
+    RAX = &reg[0];
+    RBX = &reg[1];
+    RCX = &reg[2];
+    RDX = &reg[3];
+    RSX = &reg[4];
 }
 
-uint BytesToUint(long &index)
-{
-    index++;
-    uint num =0;
-    for (long i = 0; i < 4; i++)
+void mov_reg_u64(u8 regNum, u64 num) {
+    reg[regNum] = num;
+}
+
+void mov_reg_reg(u8 regNum1, u8 regNum2) {
+    reg[regNum1] = regNum2;
+}
+
+void mov_reg_mem(u8 regNum, u64 memPos) { 
+    reg[regNum] = MAIN_MEM[memPos];
+}
+
+void mov_mem_u64(u64 memPos, u64 num) {
+    MAIN_MEM[memPos] = num;
+}
+
+void mov_mem_reg(u64 memPos, u8 regNum) {
+    MAIN_MEM[memPos] = reg[regNum];
+}
+
+void push() {
+    Stack.push(*RSX);
+}
+
+void pop() {
+    *RSX = Stack.top();
+    Stack.pop();
+}
+
+void write() {
+    std::ostream &output = (*RBX  == 0) ?  std::cout : std::cout;
+    for (u64 i = 0; i < *RDX; ++i)
     {
-        num += (byteCode[index+i] << (3-i)*8);
+        output << *(((u8*)(MAIN_MEM+*RCX))+i);
     }
-    index += sizeof(uint)-1;
-    return num;
 }
 
-uint GetVarCount()
-{
-    uint num =0;
-    for (long i = 0; i < 4; i++)
+void read() {
+    std::istream &input = (*RBX  == 0) ?  std::cin : std::cin;
+    input.getline(((s8*)(MAIN_MEM+*RCX)), (*RDX));
+}
+
+void syscall() {
+    switch (*RAX)
     {
-        num += (byteCode[i] << (3-i)*8);
+    case 0:
+        read();
+        break;
+    case 1:
+        write();
+        break;
+    default:
+        break;
     }
-    return num;
 }
 
-long LoadNum(long &index)
-{
-    return BytesTolong(index);
+void inc_IP(u64 pos) {
+    IP = (instruction*)((u64)IP + pos);
 }
 
-long LoadVar(long &index)
-{
-    return vars[BytesToUint(index)];
-}
-
-long LoadStringPointer(long &index)
-{
-    return stringPtrs[BytesToUint(index)];
-}
-
-void StoreVar(long &index) 
-{
-    index++;
-    vars[BytesToUint(index)] = temp1;
-}
-
-void LoadSecondary(long &index)
-{
-    index++;
-    if (byteCode[index]) temp2 = LoadVar(index);
-    else temp2 = LoadNum(index);
+void jmp(u64 pos) {
+    IP = program + (pos-1);
 } 
 
-uint CountStrings()
-{
-    uint count;
-    for (ulong i = 0; i < length; ++i)
-    {
-        if(byteCode[i] == 255) 
-        {
-            endPoint = i;
-            while (i < length)
-            {
-                if(byteCode[i] == 0) { count++;}
-                ++i;
-            }
-            break;
-        }
-    }
-    return count;
+void jmpz(u64 pos) {
+    if(Stack.top()) { Stack.pop(); return; }
+    jmp(pos);
 }
 
-void LoadStringPtrs()
-{
-    uint count = 0;
-    ulong pos = endPoint+1;
-    stringPtrs = (uint*)malloc(sizeof(uint)*stringCount);
-    for (ulong i = endPoint+1; i < length; i++)
-    {
-        if(count >= stringCount) return;
-        if (byteCode[i] == 0)
-        {
-            stringPtrs[count] = pos;
-            pos = i + 1;
-        }   
-    }
+void jmpnz(u64 pos) {
+    if(!Stack.top()) { Stack.pop(); return; } 
+    jmp(pos);
 }
 
-void PrintString(uint StringPtr)
-{
-    ulong index = StringPtr;
-    while (byteCode[index] != 0)
+void cmp(u8 type) {
+    u64 one = Stack.top(); Stack.pop();
+    u64 two = Stack.top(); Stack.pop();
+    switch (type)
     {
-        std::cout << byteCode[index];
-        index++;
-    }
-}
-
-void Run()
-{
-    varCount = GetVarCount();
-    vars = (long*)malloc(sizeof(long)*varCount);
-    stringCount = CountStrings();
-    LoadStringPtrs();
-    for (long i = 4; i < length; i++)
-    {
-        //std::cout<<((int)byteCode[i]) << std::endl;
-
-        switch (byteCode[i])
-        {
         case 0:
-            //Load num (89)
-            temp1 = LoadNum(i);
+            Stack.push(one == two);
             break;
         case 1:
-            //Load variable (X)
-            temp1 = LoadVar(i);
+            Stack.push(one < two);
             break;
         case 2:
-            //Load string* ("Hello, World!\n")
-            temp1 = LoadStringPointer(i);
+            Stack.push(one > two);
             break;
         case 3:
-            //Set variable
-            StoreVar(i);
+            Stack.push(one <= two);
             break;
         case 4:
-            // +
-            LoadSecondary(i);
-            temp1 += temp2;
+            Stack.push(one >= two);
             break;
-        case 5:
-            // - 
-            LoadSecondary(i);
-            temp1 = temp2 - temp1;
-            break;
-        case 6:
-            // *
-            LoadSecondary(i);
-            temp1 *= temp2;
-            break;
-        case 7:
-            // /
-            LoadSecondary(i);
-            temp1 = temp2 / temp1;
-            break;
-        case 8:
-            // %
-            LoadSecondary(i);
-            temp1 = temp2 % temp1;
-            break;
-        case 9:
-            // ==
-            LoadSecondary(i);
-            temp1 = (temp2==temp1);
-            break;
-        case 10:
-            // !=
-            LoadSecondary(i);
-            temp1 = (temp2!=temp1);
-            break;
-        case 11:
-            // >
-            LoadSecondary(i);
-            temp1 = (temp2>temp1);
-            break;
-        case 12:
-            // <
-            LoadSecondary(i);
-            temp1 = (temp2<temp1);
-            break;
-        case 13:
-            // >=
-            LoadSecondary(i);
-            temp1 = (temp2>=temp1);
-            break;
-        case 14:
-            // <=
-            LoadSecondary(i);
-            temp1 = (temp2>=temp1);
-            break;
-        case 15:
-            // !
-            temp1 = !temp1;
-            break;
-        case 16:
-            //print num
-            std::cout << temp1;
-            break;
-        case 17:
-            //print char
-            std::cout << (char)temp1;
-            break;
-        case 18:
-            //print str
-            PrintString(temp1);
-            break;
-        case 19:
-            //++
-            temp1++;
-            break;
-        case 20:
-            //--
-            temp1--;
-            break;
-        case 21:
-            //jmp
-            i = BytesTolong(i)-1;
-            break;
-        case 22:
-            //jmp not zero (if true)
-            if(temp1) i = BytesTolong(i)-1;
-            else i+=8;
-            break;
-        case 23:
-            //jmp zero (if false)
-            if(!temp1) i = BytesTolong(i)-1;
-            else i+=8;
-            break;
-        case 254:
-            //Clear temps (;)
-            temp1=0;
-            temp2=0;
-            break;
-        case 255:
-            return;
-        default:
-            break;
-        }
+    default:
+        break;
     }
-    
 }
 
-//  i = 1, sum = 4, prev = 3, next = 0, x=2
-int main()
+void call(u64 pos)
 {
-    byte bytes[] = {
-    0,0,0,1,0,0,0,0,0,0,0,3,232,6,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,11,184,4,0,0,0,0,0,0,0,0,1,5,0,0,0,0,0,0,0,0,0,3,1,0,0,0,0,1,0,0,0,0,16,255
-    };
-    byteCode = bytes;
-    length = 66;
-    Run();
+    returnStack.push(((u64)IP)+9);
+    jmp(pos);
+}
+
+void ret(){
+    IP = (instruction*)(returnStack.top()-1);
+    returnStack.pop();
+}
+
+void ExecuteCurrentInstruction(){
+    switch (*IP)
+    {
+        case 0:
+            break;
+        case 1:
+            mov_reg_u64(*(IP+1),*((u64*)(IP+2)));
+            inc_IP(9);
+            break;
+        case 2:
+            mov_reg_reg(*(IP+1), *(IP+2));
+            inc_IP(2);
+            break;
+        case 3:
+            mov_reg_mem(*(IP+1),*((u64*)(IP+2)));
+            inc_IP(9);
+            break;
+        case 4:
+            mov_mem_u64(*((u64*)(IP+1)),*((u64*)(IP+9)));
+            inc_IP(16);
+            break;
+        case 5:
+            mov_mem_reg(*((u64*)(IP+1)),*(IP+9));
+            inc_IP(9);
+            break;
+        case 6:
+            push();
+            break;
+        case 7:
+            pop();
+            break;
+        case 8:
+            syscall();
+            break;
+        case 9:
+            jmpz(*((u64*)(IP+1)));
+            break;
+        case 10:
+            jmpnz(*((u64*)(IP+1)));
+            break;
+        case 11:
+            cmp(*(IP+1));
+            break;
+        case 12:
+            jmp(*((u64*)(IP+1)));
+            break;
+        case 13:
+            call(*((u64*)(IP+1)));
+            break;
+        case 14:
+            ret();
+            break;
+        case 255:
+            end = true;
+            break;
+        default:
+            break;
+    }
+    inc_IP(1);
+}
+
+int main(){
+    init_mem();
+    init_regs();
+    load_program();
+    //std::cout << (u64)(IP-program) << std::endl;
+    //std::cout << program_len << std::endl;
+    while ((u64)(IP-program) <= program_len && !end)
+    {
+        ExecuteCurrentInstruction();
+    }
+    //std::cout << (u64)(IP-program) << std::endl;
+    //std::cout << end << std::endl;
+    return 0;
 }
