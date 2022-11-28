@@ -104,6 +104,10 @@ void call(u64 pos)
 }
 
 void ret(){
+    if(returnStack.empty()) {
+        end = true;
+        return; 
+    }
     IP = (instruction*)(returnStack.top()-1);
     returnStack.pop();
 }

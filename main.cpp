@@ -1,11 +1,32 @@
 #include "cvm.h"
 #include "commands.h"
 
+char* INSTRUCTIONS[] = {
+    "do_nothing",
+    "mov_reg_u64",
+    "mov_reg_reg",
+    "mov_reg_mem",
+    "mov_mem_u64",
+    "mov_mem_reg",
+    "push",
+    "pop",
+    "syscall",
+    "jmp",
+    "jmpz",
+    "jmpnz",
+    "cmp",
+    "call",
+    "ret" 
+};
+
 void load_program() {
     IP = program;
     }
 
-void init_mem() { MAIN_MEM = (u64*)malloc(MEM_SIZE); }
+void init_mem() { 
+    MAIN_MEM = (u64*)malloc(MEM_SIZE); 
+    *MAIN_MEM = 0x00000A4F4C4C4548; 
+}
 
 void init_regs(){
     RAX = &reg[0];
@@ -20,6 +41,7 @@ void inc_IP(u64 pos) {
 }
 
 void ExecuteCurrentInstruction(){
+    std::cout << "Executing instruction: [" << int(*IP) << "] - "  << INSTRUCTIONS[*IP] << std::endl;
     switch (*IP)
     {
         case 0:
