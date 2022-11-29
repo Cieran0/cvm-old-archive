@@ -157,24 +157,24 @@ public class Casmparser {
         }
         byteCode = finaliseByteCode(byteCode,locOfLabel,posOfLabel);
         byteCode += "255";
+        if(!byteCode.matches("^[0-9,]*$")) { System.exit(-1); }
         System.out.println(byteCode);
     }
 
+    //FIXME: Loops are broken sometimes depending on where they start
 
     private static String finaliseByteCode(String byteCode, HashMap<Integer,String> locOfLabel, HashMap<String,Integer> posOfLabel) {
         String[] splt = byteCode.split(",");
+        int count = 0;
         for (Integer pos : locOfLabel.keySet()) {
-            //System.out.println(pos);
             String label = locOfLabel.get(pos);
-            //System.out.println(label);
-            Integer replacement = posOfLabel.get(label);
-            //System.out.println(replacement);
-            String s = expandNum(Long.valueOf(replacement));
-            //System.out.println(s);
+            String s = expandNum(Long.valueOf(posOfLabel.get(label)));
+            //System.out.println("["+label+"] : { loc:" + posOfLabel.get(label) + "; index: " + (pos+(7*count)) + "; put: " + s + "; }");
             String[] replaceString = s.split(","); 
             for(int i = 0; i < 8; i++) {
-                splt[pos+i] = replaceString[i];
+                splt[pos+(7*count)+i] = replaceString[i];
             }
+            count++;
         }
         byteCode="";
         for (int i = 0; i < splt.length; i++) {

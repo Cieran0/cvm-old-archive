@@ -1,22 +1,13 @@
 main:
-    mov_reg_u64 $RBX 100000
-loop:
-    mov_reg_u64 $RAX 1
+    call func1
+    ret
+
+func1:
+    call func2
+    ret
+
+func2:
     mov_reg_u64 $RDX 16
-    syscall
-    add_reg_u64 $RBX -1
-    mov_reg_reg $RSX $RBX
-    push
-    mov_reg_u64 $RSX 0
-    push
-    cmp ==
-    jmpz loop
-    ret
-
-func:
     mov_reg_u64 $RAX 1
-    ret
-
-func3:
-    mov_reg_u64 $RAX 3
+    syscall
     ret

@@ -25,3 +25,5 @@ extern u64* RBX;
 extern u64* RCX;
 extern u64* RDX;
 extern u64* RSX;
+
+void inc_IP(u64 pos);

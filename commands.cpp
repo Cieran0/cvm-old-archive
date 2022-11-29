@@ -64,12 +64,14 @@ void jmp(u64 pos) {
 } 
 
 void jmpz(u64 pos) {
-    if(Stack.top()) { Stack.pop(); return; }
+    if(Stack.top()) { Stack.pop(); inc_IP(8); return; }
+    Stack.pop();
     jmp(pos);
 }
 
 void jmpnz(u64 pos) {
-    if(!Stack.top()) { Stack.pop(); return; } 
+    if(!Stack.top()) { Stack.pop(); inc_IP(8); return; } 
+    Stack.pop();
     jmp(pos);
 }
 

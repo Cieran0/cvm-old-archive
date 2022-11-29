@@ -94,15 +94,12 @@ void ExecuteCurrentInstruction(){
             break;
         case 9:
             jmp(*((u64*)(IP+1)));
-            inc_IP(8);
             break;
         case 10:
             jmpz(*((u64*)(IP+1)));
-            inc_IP(8);
             break;
         case 11:
             jmpnz(*((u64*)(IP+1)));
-            inc_IP(8);
             break;
         case 12:
             cmp(*(IP+1));
