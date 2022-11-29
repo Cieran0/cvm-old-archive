@@ -19,13 +19,25 @@ char* INSTRUCTIONS[] = {
     "ret" 
 };
 
+u64 reverseu64(u64 num) {
+    u64 temp = 0;
+    u8* tempPtr = (u8*)&temp;
+    u8* numPtr = (u8*)&num;
+    for (int i = 0; i < 8; i++)
+    {
+        tempPtr[i] = numPtr[7-i];
+    }
+    return temp;
+}
+
 void load_program() {
     IP = program;
     }
 
 void init_mem() { 
     MAIN_MEM = (u64*)malloc(MEM_SIZE); 
-    *MAIN_MEM = 0x00000A4F4C4C4548; 
+    //*MAIN_MEM = reverseu64(0x48656c6c6f2c2057); 
+    //*(MAIN_MEM+1) = reverseu64(0x6f726c64210a); 
 }
 
 void init_regs(){
@@ -41,7 +53,7 @@ void inc_IP(u64 pos) {
 }
 
 void ExecuteCurrentInstruction(){
-    std::cout << "Executing instruction: [" << int(*IP) << "] - "  << INSTRUCTIONS[*IP] << std::endl;
+    //std::cout << "Executing instruction: [" << int(*IP) << "] - "  << INSTRUCTIONS[*IP] << std::endl;
     switch (*IP)
     {
         case 0:

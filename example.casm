@@ -8,7 +8,7 @@ func:
 
 func2:
     mov_reg_u64 $RAX 1
-    mov_reg_u64 $RDX 4
+    mov_reg_u64 $RDX 16
     syscall
     ret
 

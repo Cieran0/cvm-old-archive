@@ -101,9 +101,10 @@ public class Casmparser {
     }
 
     public static void main(String[] args) {
+        String path = (args.length >0)? args[0] : "../example.casm";
         String text = "";
         try {
-            text = new String(Files.readAllBytes(Paths.get("../example.casm")), StandardCharsets.UTF_8);
+            text = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -114,7 +115,7 @@ public class Casmparser {
         for (String line : lines) {
             byteCode += parseLine(line);
         }
-        System.out.println(byteCode);
+        //System.out.println(byteCode);
         List<String> labels = getLabels(byteCode);
         HashMap<Integer,String> locOfLabel = new HashMap<Integer,String>();
         String[] buff = byteCode.split(",");
@@ -147,13 +148,13 @@ public class Casmparser {
     private static String finaliseByteCode(String byteCode, HashMap<Integer,String> locOfLabel, HashMap<String,Integer> posOfLabel) {
         String[] splt = byteCode.split(",");
         for (Integer pos : locOfLabel.keySet()) {
-            System.out.println(pos);
+            //System.out.println(pos);
             String label = locOfLabel.get(pos);
-            System.out.println(label);
+            //System.out.println(label);
             Integer replacement = posOfLabel.get(label);
-            System.out.println(replacement);
+            //System.out.println(replacement);
             String s = expandNum(Long.valueOf(replacement));
-            System.out.println(s);
+            //System.out.println(s);
             String[] replaceString = s.split(","); 
             for(int i = 0; i < 8; i++) {
                 splt[pos+i] = replaceString[i];
