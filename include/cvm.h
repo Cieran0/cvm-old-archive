@@ -8,7 +8,7 @@ typedef unsigned long u64;
 typedef unsigned char u8;
 typedef char s8;
 typedef unsigned char instruction;
-extern u64* MAIN_MEM;
+extern u8* MAIN_MEM;
 extern instruction* IP;
 extern std::stack<u64> Stack;
 extern std::stack<u64> returnStack;

@@ -40,9 +40,9 @@ void load_program() {
 }
 
 void init_mem() { 
-    MAIN_MEM = (u64*)malloc(MEM_SIZE); 
-    *MAIN_MEM = reverseu64(0x48656c6c6f2c2057); 
-    *(MAIN_MEM+1) = reverseu64(0x6f726c64210a); 
+    MAIN_MEM = (u8*)malloc(MEM_SIZE); 
+    // *MAIN_MEM = reverseu64(0x48656c6c6f2c2057); 
+    // *(MAIN_MEM+1) = reverseu64(0x6f726c64210a); 
 }
 
 void init_regs(){
@@ -152,5 +152,6 @@ int main(){
     }
     //std::cout << (u64)(IP-program) << std::endl;
     //std::cout << end << std::endl;
+
     return 0;
 }

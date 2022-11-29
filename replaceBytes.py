@@ -2,7 +2,7 @@
 import subprocess
 import sys
 
-output = subprocess.check_output(['java', '-jar', 'casmParser/Main.jar', 'example.casm']).decode('utf-8')
+output = subprocess.check_output(['java', '-jar', '../casmParser/Main.jar', '../Examples/example.casm']).decode('utf-8')
 
 f = open('vars.cpp',mode='r')
 lines = f.readlines()

@@ -1,5 +1,13 @@
 #include "commands.h"
 
+void set_mem_pos(u64 memPos, u64 value) {
+    *((u64*)(MAIN_MEM+memPos)) = value;
+}
+
+u64 get_mem_pos(u64 memPos) {
+    return *((u64*)(MAIN_MEM+memPos));
+}
+
 void mov_reg_u64(u8 regNum, u64 num) {
     reg[regNum] = num;
 }
@@ -13,11 +21,11 @@ void mov_reg_mem(u8 regNum, u64 memPos) {
 }
 
 void mov_mem_u64(u64 memPos, u64 num) {
-    MAIN_MEM[memPos] = num;
+    set_mem_pos(memPos,num);
 }
 
 void mov_mem_reg(u64 memPos, u8 regNum) {
-    MAIN_MEM[memPos] = reg[regNum];
+    set_mem_pos(memPos,reg[regNum]);
 }
 
 void push() {
@@ -32,7 +40,7 @@ void pop() {
 void write() {
     std::ostream &output = std::cout;
     //std::ostream &output = (*RBX  == 0) ?  std::cout : std::cout;
-    for (u64 i = 0; i < *RDX; ++i)
+    for (u64 i = 0; i < *RDX; i++)
     {
         output << *(((u8*)(MAIN_MEM+*RCX))+i);
     }
@@ -125,8 +133,8 @@ void add_reg_mem(u8 regNum, u64 memPos) {
     reg[regNum] += MAIN_MEM[memPos];
 }
 void add_mem_u64(u64 memPos, u64 num) {
-    MAIN_MEM[memPos] += num;
+    set_mem_pos(memPos, get_mem_pos(memPos) + num);
 }
 void add_mem_reg(u64 memPos, u8 regNum) {
-    MAIN_MEM[memPos] += reg[regNum];
+    set_mem_pos(memPos, get_mem_pos(memPos) + reg[regNum]);
 }
