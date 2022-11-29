@@ -5,7 +5,7 @@ void mov_reg_u64(u8 regNum, u64 num) {
 }
 
 void mov_reg_reg(u8 regNum1, u8 regNum2) {
-    reg[regNum1] = regNum2;
+    reg[regNum1] = reg[regNum2];
 }
 
 void mov_reg_mem(u8 regNum, u64 memPos) { 
@@ -30,7 +30,8 @@ void pop() {
 }
 
 void write() {
-    std::ostream &output = (*RBX  == 0) ?  std::cout : std::cout;
+    std::ostream &output = std::cout;
+    //std::ostream &output = (*RBX  == 0) ?  std::cout : std::cout;
     for (u64 i = 0; i < *RDX; ++i)
     {
         output << *(((u8*)(MAIN_MEM+*RCX))+i);
@@ -45,14 +46,14 @@ void read() {
 void syscall() {
     switch (*RAX)
     {
-    case 0:
-        read();
-        break;
-    case 1:
-        write();
-        break;
-    default:
-        break;
+        case 0:
+            read();
+            break;
+        case 1:
+            write();
+            break;
+        default:
+            break;
     }
 }
 
@@ -110,4 +111,20 @@ void ret(){
     }
     IP = (instruction*)(returnStack.top()-1);
     returnStack.pop();
+}
+
+void add_reg_u64(u8 regNum, u64 num) {
+    reg[regNum] += num;
+}
+void add_reg_reg(u8 regNum1, u8 regNum2) {
+    reg[regNum1] += reg[regNum2];
+}
+void add_reg_mem(u8 regNum, u64 memPos) {
+    reg[regNum] += MAIN_MEM[memPos];
+}
+void add_mem_u64(u64 memPos, u64 num) {
+    MAIN_MEM[memPos] += num;
+}
+void add_mem_reg(u64 memPos, u8 regNum) {
+    MAIN_MEM[memPos] += reg[regNum];
 }

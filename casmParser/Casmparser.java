@@ -30,7 +30,13 @@ public class Casmparser {
         "jmpnz",
         "cmp",
         "call",
-        "ret" };
+        "ret",
+        "add_reg_u64",
+        "add_reg_reg",
+        "add_reg_mem",
+        "add_mem_u64",
+        "add_mem_reg"
+    };
     
     public static final String[] REGISTERS = {
         "$RAX",
@@ -38,6 +44,14 @@ public class Casmparser {
         "$RCX",
         "$RDX",
         "$RSX"
+    };
+
+    public static final String[] CMPS = {
+            "==",
+            "<",
+            ">",
+            "<=",
+            ">="
     };
 
     public static byte[] reverse(byte[] array) {
@@ -74,11 +88,13 @@ public class Casmparser {
     }
 
     public static String parseWord(String word) {
-        if(word.matches("-?\\d+")) return expandNum(Long.parseUnsignedLong(word));
+        if(word.matches("-?\\d+")) return expandNum(Long.parseLong(word));
         for (int i = 0; i < INSTRUCTIONS.length; i++) {
             if(INSTRUCTIONS[i].equals(word)) return Integer.toString(i);
             if(i >= REGISTERS.length) continue;
             if(REGISTERS[i].equals(word)) return Integer.toString(i);
+            if(i >= CMPS.length) continue;
+            if(CMPS[i].equals(word)) return Integer.toString(i);
         }
         return word;
     }

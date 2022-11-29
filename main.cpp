@@ -16,7 +16,12 @@ char* INSTRUCTIONS[] = {
     "jmpnz",
     "cmp",
     "call",
-    "ret" 
+    "ret",
+    "add_reg_u64",
+    "add_reg_reg",
+    "add_reg_mem",
+    "add_mem_u64",
+    "add_mem_reg"
 };
 
 u64 reverseu64(u64 num) {
@@ -32,12 +37,12 @@ u64 reverseu64(u64 num) {
 
 void load_program() {
     IP = program;
-    }
+}
 
 void init_mem() { 
     MAIN_MEM = (u64*)malloc(MEM_SIZE); 
-    //*MAIN_MEM = reverseu64(0x48656c6c6f2c2057); 
-    //*(MAIN_MEM+1) = reverseu64(0x6f726c64210a); 
+    *MAIN_MEM = reverseu64(0x48656c6c6f2c2057); 
+    *(MAIN_MEM+1) = reverseu64(0x6f726c64210a); 
 }
 
 void init_regs(){
@@ -88,22 +93,46 @@ void ExecuteCurrentInstruction(){
             syscall();
             break;
         case 9:
-            jmpz(*((u64*)(IP+1)));
+            jmp(*((u64*)(IP+1)));
+            inc_IP(8);
             break;
         case 10:
-            jmpnz(*((u64*)(IP+1)));
+            jmpz(*((u64*)(IP+1)));
+            inc_IP(8);
             break;
         case 11:
-            cmp(*(IP+1));
+            jmpnz(*((u64*)(IP+1)));
+            inc_IP(8);
             break;
         case 12:
-            jmp(*((u64*)(IP+1)));
+            cmp(*(IP+1));
+            inc_IP(1);
             break;
         case 13:
             call(*((u64*)(IP+1)));
             break;
         case 14:
             ret();
+            break;
+        case 15:
+            add_reg_u64(*(IP+1),*((u64*)(IP+2)));
+            inc_IP(9);
+            break;
+        case 16:
+            add_reg_reg(*(IP+1), *(IP+2));
+            inc_IP(2);
+            break;
+        case 17:
+            add_reg_mem(*(IP+1),*((u64*)(IP+2)));
+            inc_IP(9);
+            break;
+        case 18:
+            add_mem_u64(*((u64*)(IP+1)),*((u64*)(IP+9)));
+            inc_IP(16);
+            break;
+        case 19:
+            add_mem_reg(*((u64*)(IP+1)),*(IP+9));
+            inc_IP(9);
             break;
         case 255:
             end = true;
